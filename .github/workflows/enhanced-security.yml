@@ -172,19 +172,67 @@ jobs:
             ls -la *.sarif 2>/dev/null || echo "No SARIF files found"
           fi
 
+      - name: Process and clean SARIF file
+        if: steps.check-sarif.outputs.sarif-exists == 'true'
+        run: |
+          SARIF_FILE="snyk-${{ matrix.scan-type }}.sarif"
+          PROCESSED_SARIF="processed-snyk-${{ matrix.scan-type }}.sarif"
+
+          echo "� Processing SARIF file to ensure unique category..."
+
+          # Create a unique category name
+          UNIQUE_CATEGORY="snyk-${{ matrix.scan-type }}-$(date +%Y%m%d%H%M%S)-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "UNIQUE_CATEGORY=$UNIQUE_CATEGORY" >> $GITHUB_ENV
+          echo "PROCESSED_SARIF=$PROCESSED_SARIF" >> $GITHUB_ENV
+
+          # Process the SARIF file with Python to ensure unique category and single run
+          python3 << EOF
+          import json
+          import sys
+
+          try:
+              # Read the original SARIF file
+              with open('$SARIF_FILE', 'r') as f:
+                  sarif_data = json.load(f)
+              
+              # Ensure we only have one run and set unique category
+              if 'runs' in sarif_data and len(sarif_data['runs']) > 0:
+                  # Keep only the first run if there are multiple
+                  sarif_data['runs'] = [sarif_data['runs'][0]]
+                  
+                  # Set the automation details with unique category
+                  if 'automationDetails' not in sarif_data['runs'][0]:
+                      sarif_data['runs'][0]['automationDetails'] = {}
+                  
+                  sarif_data['runs'][0]['automationDetails']['id'] = '$UNIQUE_CATEGORY'
+              
+              # Write the processed SARIF file
+              with open('$PROCESSED_SARIF', 'w') as f:
+                  json.dump(sarif_data, f, indent=2)
+              
+              print("✅ SARIF file processed successfully")
+              sys.exit(0)
+          except Exception as e:
+              print(f"❌ Error processing SARIF file: {e}")
+              sys.exit(1)
+          EOF
+
       - name: Upload SARIF results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: steps.check-sarif.outputs.sarif-exists == 'true'
         with:
-          sarif_file: snyk-${{ matrix.scan-type }}.sarif
-          category: snyk-${{ matrix.scan-type }}-${{ github.run_id }}-${{ strategy.job-index }}
+          sarif_file: ${{ env.PROCESSED_SARIF }}
+          category: ${{ env.UNIQUE_CATEGORY }}
+          wait-for-processing: false
 
       - name: Archive security scan results
         uses: actions/upload-artifact@v4
         if: steps.check-sarif.outputs.sarif-exists == 'true'
         with:
-          name: snyk-${{ matrix.scan-type }}-results
-          path: snyk-${{ matrix.scan-type }}.sarif
+          name: snyk-${{ matrix.scan-type }}-results-${{ github.run_id }}
+          path: |
+            snyk-${{ matrix.scan-type }}.sarif
+            ${{ env.PROCESSED_SARIF }}
           retention-days: 30
 
   # Container security scanning
@@ -250,12 +298,58 @@ jobs:
             echo "❌ Container SARIF file not found"
           fi
 
+      - name: Process and clean container SARIF file
+        if: steps.check-container-sarif.outputs.sarif-exists == 'true'
+        run: |
+          SARIF_FILE="snyk-container.sarif"
+          PROCESSED_SARIF="processed-snyk-container.sarif"
+
+          echo "� Processing container SARIF file to ensure unique category..."
+
+          # Create a unique category name
+          UNIQUE_CONTAINER_CATEGORY="snyk-container-$(date +%Y%m%d%H%M%S)-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "UNIQUE_CONTAINER_CATEGORY=$UNIQUE_CONTAINER_CATEGORY" >> $GITHUB_ENV
+          echo "PROCESSED_CONTAINER_SARIF=$PROCESSED_SARIF" >> $GITHUB_ENV
+
+          # Process the SARIF file with Python to ensure unique category and single run
+          python3 << EOF
+          import json
+          import sys
+
+          try:
+              # Read the original SARIF file
+              with open('$SARIF_FILE', 'r') as f:
+                  sarif_data = json.load(f)
+              
+              # Ensure we only have one run and set unique category
+              if 'runs' in sarif_data and len(sarif_data['runs']) > 0:
+                  # Keep only the first run if there are multiple
+                  sarif_data['runs'] = [sarif_data['runs'][0]]
+                  
+                  # Set the automation details with unique category
+                  if 'automationDetails' not in sarif_data['runs'][0]:
+                      sarif_data['runs'][0]['automationDetails'] = {}
+                  
+                  sarif_data['runs'][0]['automationDetails']['id'] = '$UNIQUE_CONTAINER_CATEGORY'
+              
+              # Write the processed SARIF file
+              with open('$PROCESSED_SARIF', 'w') as f:
+                  json.dump(sarif_data, f, indent=2)
+              
+              print("✅ Container SARIF file processed successfully")
+              sys.exit(0)
+          except Exception as e:
+              print(f"❌ Error processing container SARIF file: {e}")
+              sys.exit(1)
+          EOF
+
       - name: Upload container scan results
         uses: github/codeql-action/upload-sarif@v3
         if: steps.check-container-sarif.outputs.sarif-exists == 'true'
         with:
-          sarif_file: snyk-container.sarif
-          category: snyk-container-${{ github.run_id }}
+          sarif_file: ${{ env.PROCESSED_CONTAINER_SARIF }}
+          category: ${{ env.UNIQUE_CONTAINER_CATEGORY }}
+          wait-for-processing: false
 
   # Monitor deployed dependencies (only on main branch)
   monitor:
