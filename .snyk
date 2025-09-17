@@ -7,6 +7,57 @@ version: v1.0.0
 # Use this section to ignore vulnerabilities that are false positives
 # or have acceptable risk in your specific context
 ignore:
+  # Container vulnerabilities from base image - low severity, marked unimportant by Debian
+  SNYK-DEBIAN13-SQLITE3-12549228:
+    - '*':
+        reason: 'Low severity SQLite vulnerability in base image with no known exploit'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5681241:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-TAR-5696683:
+    - '*':
+        reason: 'Low severity tar vulnerability from 2005, marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5681177:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5680884:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5681215:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-SHADOW-5695385:
+    - '*':
+        reason: 'Low severity shadow vulnerability from 2007, marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-UTILLINUX-5698535:
+    - '*':
+        reason: 'Low severity util-linux vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5681256:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+  
+  SNYK-DEBIAN13-GLIBC-5681145:
+    - '*':
+        reason: 'Low severity glibc vulnerability marked as unimportant by Debian'
+        expires: '2025-12-01T00:00:00.000Z'
+
   # Example: Ignore a specific vulnerability in a transitive dependency
   # 'SNYK-JAVA-ORGAPACHECOMMONS-1234567':
   #   - '*':
