@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   # Enhanced GitHub Actions workflow with comprehensive Snyk integration
+# Enhanced GitHub Actions workflow with comprehensive Snyk integration
 # This file demonstrates advanced Snyk configuration for the practical guide
 name: Enhanced CI/CD with Comprehensive Security
 
@@ -92,6 +92,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean workspace SARIF files
+        run: |
+          echo "🧹 Cleaning any existing SARIF files from workspace..."
+          find . -name "*.sarif" -type f -delete 2>/dev/null || true
+          echo "✅ Workspace cleaned"
+
       - name: Clean previous SARIF files
         run: |
           echo "🧹 Cleaning any existing SARIF files..."
@@ -171,7 +177,7 @@ jobs:
         if: steps.check-sarif.outputs.sarif-exists == 'true'
         with:
           sarif_file: snyk-${{ matrix.scan-type }}.sarif
-          category: snyk-${{ matrix.scan-type }}-scan
+          category: snyk-${{ matrix.scan-type }}-${{ github.run_id }}-${{ strategy.job-index }}
 
       - name: Archive security scan results
         uses: actions/upload-artifact@v4
@@ -190,6 +196,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Clean workspace SARIF files
+        run: |
+          echo "🧹 Cleaning any existing SARIF files from workspace..."
+          find . -name "*.sarif" -type f -delete 2>/dev/null || true
+          echo "✅ Workspace cleaned"
 
       - name: Clean previous SARIF files
         run: |
@@ -243,7 +255,7 @@ jobs:
         if: steps.check-container-sarif.outputs.sarif-exists == 'true'
         with:
           sarif_file: snyk-container.sarif
-          category: snyk-container-scan
+          category: snyk-container-${{ github.run_id }}
 
   # Monitor deployed dependencies (only on main branch)
   monitor:
