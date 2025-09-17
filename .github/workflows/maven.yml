@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["master"]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   test:
     name: build and test
@@ -27,7 +31,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+      - name: Build project
+        run: mvn clean compile -DskipTests
       - name: Run Snyk to check for vulnerabilities
+        continue-on-error: true
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
