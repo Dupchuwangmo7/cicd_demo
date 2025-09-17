@@ -1,4 +1,4 @@
-# Enhanced GitHub Actions workflow with comprehensive Snyk integration
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   # Enhanced GitHub Actions workflow with comprehensive Snyk integration
 # This file demonstrates advanced Snyk configuration for the practical guide
 name: Enhanced CI/CD with Comprehensive Security
 
@@ -92,6 +92,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean previous SARIF files
+        run: |
+          echo "🧹 Cleaning any existing SARIF files..."
+          rm -f *.sarif || true
+
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
@@ -166,7 +171,7 @@ jobs:
         if: steps.check-sarif.outputs.sarif-exists == 'true'
         with:
           sarif_file: snyk-${{ matrix.scan-type }}.sarif
-          category: snyk-${{ matrix.scan-type }}
+          category: snyk-${{ matrix.scan-type }}-scan
 
       - name: Archive security scan results
         uses: actions/upload-artifact@v4
@@ -185,6 +190,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Clean previous SARIF files
+        run: |
+          echo "🧹 Cleaning any existing SARIF files..."
+          rm -f *.sarif || true
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -210,7 +220,7 @@ jobs:
           npm install -g snyk
           snyk --version
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          
+
           echo "🐳 Running container security scan..."
           if ! snyk container test cicd-demo:latest --severity-threshold=high --sarif-file-output=snyk-container.sarif; then
             echo "⚠️ Container scan found vulnerabilities, but continuing to generate SARIF"
@@ -233,7 +243,7 @@ jobs:
         if: steps.check-container-sarif.outputs.sarif-exists == 'true'
         with:
           sarif_file: snyk-container.sarif
-          category: snyk-container
+          category: snyk-container-scan
 
   # Monitor deployed dependencies (only on main branch)
   monitor:

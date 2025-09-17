@@ -5,6 +5,7 @@ To fix the workflow errors, you need to set up the following repository secrets 
 ## Required Secrets
 
 ### 1. SNYK_TOKEN
+
 - **Purpose**: Authentication for Snyk security scanning
 - **How to get it**:
   1. Go to [https://snyk.io](https://snyk.io)
@@ -13,6 +14,7 @@ To fix the workflow errors, you need to set up the following repository secrets 
   4. Copy your API token
 
 ### 2. SLACK_WEBHOOK_URL (Optional)
+
 - **Purpose**: Send notifications to Slack when security issues are found
 - **How to get it**:
   1. Go to your Slack workspace
@@ -28,6 +30,7 @@ To fix the workflow errors, you need to set up the following repository secrets 
 3. In the left sidebar, click **Secrets and variables** → **Actions**
 4. Click **New repository secret**
 5. Add each secret:
+
    - **Name**: `SNYK_TOKEN`
    - **Value**: Your Snyk API token
    - Click **Add secret**
@@ -47,6 +50,7 @@ The following issues have been fixed in your workflows:
 ## Testing the Fix
 
 After adding the SNYK_TOKEN secret:
+
 1. Make a small commit and push to trigger the workflow
 2. Check the Actions tab to see if the workflow runs successfully
 3. Any remaining "Resource not accessible" errors should be resolved
